@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Bietto · Oversize Collection</title>
+    <!-- Librerías para PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <!-- Font Awesome para íconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* ========== ESTILOS BASE ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background-color: #fafafa;
+            color: #1a1a1a;
+            line-height: 1.5;
+        }
+
+        .top-bar {
+            background: #1a1a1a;
+            color: #e0e0e0;
+            overflow: hidden;
+            white-space: nowrap;
+            padding: 12px 0;
+            border-bottom: 1px solid #333;
+            position: relative;
+        }
+        .top-bar span {
+            display: inline-block;
+            animation: scrollText 15s linear infinite;
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 300;
+            padding-left: 100%;
+        }
+        @keyframes scrollText {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100%); }
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px 50px;
+            background: white;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+            border-bottom: 1px solid #f0f0f0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo img {
+            height: 50px;
+            width: auto;
+            max-width: 200px;
+            object-fit: contain;
+        }
+
+        nav a {
+            margin: 0 25px;
+            text-decoration: none;
+            color: #333;
+            font-weight: 400;
+            font-size: 0.95rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            transition: color 0.2s;
+            cursor: pointer;
+        }
+        nav a:hover {
+            color: #000;
+            border-bottom: 1px solid #000;
+            padding-bottom: 4px;
+        }
+
+        .cart-icon {
+            position: relative;
+            cursor: pointer;
+            margin-left: 20px;
+        }
+        .cart-icon span {
+            font-size: 1.5rem;
+        }
+        .cart-count {
+            position: absolute;
+            top: -10px;
+            right: -12px;
+            background: #1a1a1a;
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 20px;
+            font-weight: 400;
+        }
+
+        .admin-icon {
+            cursor: pointer;
+            font-size: 1.5rem;
+            margin-left: 20px;
+            color: #333;
+            transition: color 0.2s;
+        }
+        .admin-icon:hover {
+            color: #000;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+        }
+
+        /* ===== HERO ===== */
+        .hero {
+            position: relative;
+            height: 450px;
+            overflow: hidden;
+            margin-bottom: 60px;
+        }
+        .hero-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+        }
+        .hero-slide.active {
+            opacity: 1;
+            z-index: 1;
+        }
+        .hero-slide::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.5) 100%);
+            z-index: -1;
+        }
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            padding: 20px;
+        }
+        .hero-content h1 {
+            font-size: 3.5rem;
+            font-weight: 300;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+        }
+        .hero-content p {
+            font-size: 1.1rem;
+            font-weight: 200;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+            color: #f0f0f0;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.2rem;
+            font-weight: 300;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin: 60px 0 40px;
+            position: relative;
+        }
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 1px;
+            background: #ccc;
+            margin: 15px auto 0;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 35px;
+            max-width: 1300px;
+            margin: 0 auto 60px;
+            padding: 0 30px;
+        }
+        .product-card {
+            background: white;
+            border-radius: 0;
+            overflow: hidden;
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+            border: 1px solid #f5f5f5;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        .product-card:hover {
+            transform: translateY(-6px);
+        }
+        .product-img {
+            height: 280px;
+            background-size: cover;
+            background-position: center;
+            background-color: #f9f9f9;
+            transition: opacity 0.3s;
+            position: relative;
+        }
+        .product-card:hover .product-img {
+            opacity: 0.95;
+        }
+        .product-info {
+            padding: 20px;
+            text-align: center;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .product-title {
+            font-weight: 400;
+            font-size: 1rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        .product-price {
+            font-weight: 300;
+            font-size: 1.2rem;
+            margin: 10px 0;
+            color: #1a1a1a;
+        }
+        .size-selector {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .size-btn {
+            width: 40px;
+            height: 40px;
+            border: 1px solid #ccc;
+            background: transparent;
+            font-weight: 300;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-radius: 0;
+        }
+        .size-btn.active {
+            background: #1a1a1a;
+            color: white;
+            border-color: #1a1a1a;
+        }
+        .quantity-selector {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .quantity-selector button {
+            width: 30px;
+            height: 30px;
+            border: 1px solid #ccc;
+            background: transparent;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: 0.2s;
+        }
+        .quantity-selector button:hover {
+            background: #f0f0f0;
+        }
+        .quantity-selector span {
+            min-width: 30px;
+            text-align: center;
+        }
+        .add-to-cart {
+            width: 100%;
+            padding: 14px 0;
+            background: transparent;
+            color: #1a1a1a;
+            border: 1px solid #1a1a1a;
+            font-weight: 300;
+            letter-spacing: 1.5px;
+            cursor: pointer;
+            transition: 0.2s;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            margin-top: auto;
+        }
+        .add-to-cart:hover:not(:disabled) {
+            background: #1a1a1a;
+            color: white;
+        }
+        .add-to-cart:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            border-color: #999;
+            color: #999;
+        }
+
+        /* Etiqueta de agotado */
+        .sold-out {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            font-weight: 300;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            z-index: 2;
+        }
+
+        /* Botón de toggle para admin */
+        .admin-toggle {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: white;
+            border: 1px solid #333;
+            border-radius: 20px;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            z-index: 3;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .admin-toggle:hover {
+            background: #f0f0f0;
+        }
+        .admin-toggle i {
+            font-size: 0.9rem;
+        }
+
+        .cart-panel {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 380px;
+            height: 100vh;
+            background: white;
+            box-shadow: -5px 0 30px rgba(0,0,0,0.1);
+            padding: 30px;
+            transition: right 0.3s ease;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        .cart-panel.active {
+            right: 0;
+        }
+        .cart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+        .cart-header h3 {
+            font-weight: 300;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-size: 1.3rem;
+        }
+        .close-cart {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #aaa;
+        }
+        .close-cart:hover {
+            color: #000;
+        }
+        .cart-items {
+            list-style: none;
+            margin: 20px 0;
+        }
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #f5f5f5;
+        }
+        .cart-item-info h4 {
+            font-weight: 400;
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+        .cart-item-price {
+            color: #666;
+            font-weight: 300;
+            font-size: 0.9rem;
+        }
+        .cart-item-remove {
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+        .cart-item-remove:hover {
+            color: red;
+        }
+        .cart-total {
+            font-size: 1.2rem;
+            font-weight: 300;
+            letter-spacing: 1px;
+            margin: 20px 0;
+            text-align: right;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+        .checkout-btn {
+            width: 100%;
+            padding: 16px;
+            background: #1a1a1a;
+            color: white;
+            border: none;
+            font-weight: 300;
+            letter-spacing: 2px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: background 0.2s;
+        }
+        .checkout-btn:hover {
+            background: #333;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-content {
+            background: white;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            position: relative;
+        }
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #aaa;
+        }
+        .modal-close:hover {
+            color: #000;
+        }
+        .modal-content h2 {
+            font-weight: 300;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 300;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            font-weight: 300;
+            font-size: 1rem;
+            background: white;
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        .form-group.checkbox {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .form-group.checkbox input {
+            width: auto;
+        }
+        .submit-btn {
+            background: #1a1a1a;
+            color: white;
+            border: none;
+            padding: 16px;
+            width: 100%;
+            font-weight: 300;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .submit-btn:hover {
+            background: #333;
+        }
+        .quote-box {
+            background: #f9f9f9;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid #eee;
+            font-weight: 300;
+        }
+        .quote-box h3 {
+            font-weight: 400;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+        .quote-box p {
+            margin: 5px 0;
+        }
+        .quote-box .total-quote {
+            font-size: 1.3rem;
+            font-weight: 400;
+            border-top: 1px solid #ccc;
+            padding-top: 15px;
+            margin-top: 15px;
+            text-align: right;
+        }
+
+        /* Panel de administración (oculto por defecto) */
+        .admin-panel {
+            max-width: 1300px;
+            margin: 40px auto;
+            padding: 30px;
+            background: #f0f0f0;
+            border: 2px dashed #333;
+            border-radius: 8px;
+            display: none;
+        }
+        .admin-panel h3 {
+            font-weight: 300;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+        .admin-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            align-items: end;
+        }
+        .admin-form .form-group {
+            margin-bottom: 0;
+        }
+        .admin-form button {
+            background: #1a1a1a;
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            font-weight: 300;
+            letter-spacing: 1.5px;
+            cursor: pointer;
+            text-transform: uppercase;
+            height: 50px;
+        }
+        .admin-form button:hover {
+            background: #333;
+        }
+
+        /* Botón de cerrar sesión */
+        .logout-btn {
+            background: #888;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-weight: 300;
+            letter-spacing: 1px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 20px;
+        }
+        .logout-btn:hover {
+            background: #666;
+        }
+
+        footer {
+            background: #111;
+            color: #aaa;
+            text-align: center;
+            padding: 40px;
+            font-weight: 300;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+        }
+
+        .whatsapp-float {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #25D366;
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            text-align: center;
+            font-size: 30px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            z-index: 3000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        .whatsapp-float:hover {
+            background-color: #128C7E;
+            transform: scale(1.1);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+        }
+        .whatsapp-float i {
+            font-size: 34px;
+        }
+
+        @media (max-width: 1024px) {
+            header { padding: 20px 30px; }
+            nav a { margin: 0 15px; font-size: 0.9rem; }
+            .hero-content h1 { font-size: 2.8rem; }
+            .product-grid { gap: 25px; padding: 0 25px; }
+        }
+
+        @media (max-width: 768px) {
+            header { padding: 15px 20px; }
+            nav { display: none; }
+            .logo img { height: 40px; }
+            .hero { height: 350px; margin-bottom: 40px; }
+            .hero-content h1 { font-size: 2.2rem; }
+            .product-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; padding: 0 15px; }
+            .product-img { height: 220px; }
+            .whatsapp-float { width: 50px; height: 50px; font-size: 26px; }
+            .admin-form { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 480px) {
+            header { padding: 12px 15px; }
+            .logo img { height: 35px; }
+            .hero { height: 280px; }
+            .hero-content h1 { font-size: 1.8rem; }
+            .product-grid { grid-template-columns: 1fr; }
+            .product-img { height: 280px; }
+            .cart-panel { width: 100%; right: -100%; }
+            .whatsapp-float { width: 45px; height: 45px; font-size: 24px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Franja superior animada -->
+    <div class="top-bar">
+        <span>🚚 ENVÍOS A TODO EL PERÚ · ENTREGA EN 3-5 DÍAS HÁBILES 🚚</span>
+    </div>
+
+    <header>
+        <div class="logo">
+            <img src="https://i.ibb.co/tw3fFn93/logo-3.png" alt="Bietto Oversize">
+        </div>
+        <nav>
+            <a id="navAll">TODOS</a>
+            <a id="navBasics">BÁSICOS</a>
+            <a id="navCustom">PERSONALIZADOS</a>
+            <a id="navLimited">ED. LIMITADA</a>
+        </nav>
+        <div class="header-right">
+            <div class="admin-icon" id="adminIcon" title="Acceso administrador">
+                <i class="fas fa-key"></i>
+            </div>
+            <div class="cart-icon" id="cartToggle">
+                <span>🛒</span>
+                <span class="cart-count" id="cartCount">0</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- HERO -->
+    <section class="hero" id="hero">
+        <div class="hero-slide active" style="background-image: url('https://i.ibb.co/HT2X5G95/PORTADOA-INICIAL.png');">
+            <div class="hero-content">
+                <h1>EL OVERSIZE PERFECTO</h1>
+                <p>Algodón orgánico · Hecho a mano</p>
+            </div>
+        </div>
+        <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');">
+            <div class="hero-content">
+                <h1>ESTILO URBANO</h1>
+                <p>Edición limitada · Diseño exclusivo</p>
+            </div>
+        </div>
+        <div class="hero-slide" style="background-image: url('https://i.ibb.co/fdxJgbhL/PORTAda-3.png');">
+            <div class="hero-content">
+                <h1>COMODIDAD ABSOLUTA</h1>
+                <p>Algodón reactivo 20/1 · Oversize</p>
+            </div>
+        </div>
+    </section>
+
+    <h2 class="section-title" id="collection-title">COLECCIÓN PRINCIPAL</h2>
+    <div class="product-grid" id="productGrid"></div>
+
+    <!-- Panel de administración para agregar productos (oculto por defecto) -->
+    <div class="admin-panel" id="adminPanel">
+        <h3>⚙️ ADMIN: Agregar Producto</h3>
+        <div class="admin-form">
+            <div class="form-group">
+                <label>Nombre del producto</label>
+                <input type="text" id="newName" placeholder="Ej: OVERSIZE NEGRO">
+            </div>
+            <div class="form-group">
+                <label>Precio (S/)</label>
+                <input type="number" step="0.01" id="newPrice" placeholder="35.00">
+            </div>
+            <div class="form-group">
+                <label>Categoría</label>
+                <select id="newCategory">
+                    <option value="basico">Básico</option>
+                    <option value="personalizado">Personalizado</option>
+                    <option value="limited">Edición Limitada</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>URL de la imagen</label>
+                <input type="url" id="newImage" placeholder="https://...">
+            </div>
+            <div class="form-group checkbox">
+                <input type="checkbox" id="newAvailable" checked>
+                <label for="newAvailable">Disponible</label>
+            </div>
+            <button id="addProductBtn">➕ Agregar producto</button>
+        </div>
+        <!-- Botón de cerrar sesión admin -->
+        <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+            <button class="logout-btn" id="logoutAdminBtn">
+                <i class="fas fa-sign-out-alt"></i> Cerrar sesión admin
+            </button>
+        </div>
+    </div>
+
+    <!-- Carrito -->
+    <div class="cart-panel" id="cartPanel">
+        <div class="cart-header">
+            <h3>CARRITO</h3>
+            <button class="close-cart" id="closeCart">&times;</button>
+        </div>
+        <ul class="cart-items" id="cartItems"></ul>
+        <div class="cart-total" id="cartTotal">Total: S/0.00</div>
+        <button class="checkout-btn" id="openCheckoutBtn">PROCESAR PEDIDO</button>
+    </div>
+
+    <!-- MODAL DE CHECKOUT -->
+    <div class="modal-overlay" id="checkoutModal">
+        <div class="modal-content">
+            <span class="modal-close" id="closeModal">&times;</span>
+            <h2>DATOS DE ENVÍO</h2>
+            <form id="shippingForm">
+                <div class="form-group">
+                    <label>Nombre completo *</label>
+                    <input type="text" id="name" required>
+                </div>
+                <div class="form-group">
+                    <label>DNI *</label>
+                    <input type="text" id="dni" required placeholder="12345678">
+                </div>
+                <div class="form-group">
+                    <label>Dirección *</label>
+                    <input type="text" id="address" required>
+                </div>
+                <div class="form-group">
+                    <label>Ciudad *</label>
+                    <input type="text" id="city" required>
+                </div>
+                <div class="form-group">
+                    <label>Teléfono (opcional)</label>
+                    <input type="tel" id="phone">
+                </div>
+                <div class="form-group">
+                    <label>Notas adicionales (opcional)</label>
+                    <textarea id="notes"></textarea>
+                </div>
+                <button type="submit" class="submit-btn" id="generateQuote">GENERAR COTIZACIÓN</button>
+            </form>
+            <div id="quoteResult" style="display: none;" class="quote-box"></div>
+        </div>
+    </div>
+
+    <!-- BOTÓN WHATSAPP -->
+    <a href="https://wa.me/51920538436?text=Hola%2C%20quiero%20hacer%20un%20pedido" class="whatsapp-float" target="_blank">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <footer>
+        <p>BIETTO OVERSIZE © 2025 · Hecho con dedicación</p>
+        <p style="margin-top: 12px;">✉️ bietto@oversize.com · 📍 Lima, Perú</p>
+    </footer>
+
+    <script>
+        // ===== CONFIGURACIÓN =====
+        const ADMIN_PASSWORD = 'bietto2025'; // Cambia esto por la contraseña que desees
+
+        // ===== VARIABLES GLOBALES =====
+        let cart = [];
+        let currentCategory = 'all'; // 'all', 'basico', 'personalizado', 'limited'
+
+        // Array de productos con disponibilidad
+        let products = [
+            // Básicos (1-10) todos disponibles por defecto
+            { id: 1, name: "OVERSIZE NEGRO", price: 35.00, category: "basico", image: "https://i.ibb.co/ZDVmFWm/Gemini-Generated-Image-tpurpqtpurpqtpur.png", available: true },
+            { id: 2, name: "OVERSIZE VERDE MILITAR", price: 35.00, category: "basico", image: "https://i.ibb.co/xS851dhN/Gemini-Generated-Image-a1w8wka1w8wka1w8.png", available: true },
+            { id: 3, name: "OVERSIZE BLANCO", price: 35.00, category: "basico", image: "https://i.ibb.co/sJCTS61V/Gemini-Generated-Image-qg86kwqg86kwqg86.png", available: true },
+            { id: 4, name: "OVERSIZE GRIS", price: 35.00, category: "basico", image: "https://i.ibb.co/vCz02M87/Gemini-Generated-Image-yld72myld72myld7.png", available: true },
+            { id: 5, name: "OVERSIZE BEIGE", price: 35.00, category: "basico", image: "https://i.ibb.co/B7FJ02P/Gemini-Generated-Image-aam2kmaam2kmaam2.png", available: true },
+            { id: 6, name: "OVERSIZE AZUL MARINO", price: 35.00, category: "basico", image: "https://i.ibb.co/R4Yv1Y4J/Gemini-Generated-Image-r3w46kr3w46kr3w4.png", available: true },
+            { id: 7, name: "OVERSIZE CELESTE", price: 35.00, category: "basico", image: "https://i.ibb.co/5Wr3nFtp/Gemini-Generated-Image-rshx2urshx2urshx.png", available: true },
+            { id: 8, name: "OVERSIZE MARRÓN", price: 35.00, category: "basico", image: "https://i.ibb.co/Y4Lv6gdB/Gemini-Generated-Image-4joip14joip14joi.png", available: true },
+            { id: 9, name: "OVERSIZE ROJO VINO", price: 35.00, category: "basico", image: "https://i.ibb.co/xqTXzBfY/Gemini-Generated-Image-9slkyv9slkyv9slk.png", available: true },
+            { id: 10, name: "OVERSIZE ROSADO PASTEL", price: 35.00, category: "basico", image: "https://i.ibb.co/mrqrBqYz/Gemini-Generated-Image-z6683ez6683ez668.png", available: true },
+            // Personalizados (11-20)
+            { id: 11, name: "OVERSIZE VERDE MILITAR PERSONALIZADO", price: 55.00, category: "personalizado", image: "https://i.ibb.co/Y4X3q8J6/dise-o-2.png", available: true },
+            { id: 12, name: "OVERSIZE NEGRO PERSONALIZADO", price: 55.00, category: "personalizado", image: "https://i.ibb.co/3mnc13my/dise-o1.png", available: true },
+            { id: 13, name: "OVERSIZE BLANCO PERSONALIZADO", price: 55.00, category: "personalizado", image: "https://i.ibb.co/LhcTWqGD/dise-o-3.png", available: true },
+            { id: 14, name: "OVERSIZE GRIS PERSONALIZADO", price: 55.00, category: "personalizado", image: "https://i.ibb.co/rRpK3qjk/dise-o-4.png", available: true },
+            { id: 15, name: "OVERSIZE BEIGE PERSONALIZADO", price: 55.00, category: "personalizado", image: "https://i.ibb.co/5gjj40Ly/dise-o-5.png", available: true },
+            { id: 16, name: "OVERSIZE NEGRO PERSONALIZADO", price: 55.00, category: "personalizado", image: "https://i.ibb.co/chwmpBQ8/dise-o-6.png", available: true },
+            { id: 17, name: "OVERSIZE CELESTE PERSONALIZADO", price: 55.00, category: "personalizado", image: "https://i.ibb.co/MkmSt2nW/dise-o-7.png", available: true },
+            { id: 18, name: "OVERSIZE MARRÓN PERSONALIZADO", price: 55.00, category: "personalizado", image: "https://i.ibb.co/kVFqTk6h/dise-o-8.png", available: true },
+            { id: 19, name: "OVERSIZE ROJO VINO PERSONALIZADO", price: 55.00, category: "personalizado", image: "https://i.ibb.co/HL2vm42F/dise-o-9.png", available: true },
+            { id: 20, name: "OVERSIZE ROSADO PERSONALIZADO", price: 55.00, category: "personalizado", image: "https://i.ibb.co/HTHBxCNs/dise-o-10.png", available: true },
+            // Edición Limitada (21-30)
+            { id: 21, name: "ENERGÍA NOCTURNA OVER", price: 75.00, category: "limited", image: "https://i.ibb.co/TBvK6F36/d1.png", available: true },
+            { id: 22, name: "ORO METÁLICO OVER", price: 89.00, category: "limited", image: "https://i.ibb.co/zHBdJ7KL/d2.png", available: true },
+            { id: 23, name: "SOMBRA DINÁMICA OVER", price: 85.00, category: "limited", image: "https://i.ibb.co/CKTRZJCh/d3.png", available: true },
+            { id: 24, name: "VERDE IMPERIAL OVER", price: 82.00, category: "limited", image: "https://i.ibb.co/ynBCBYLz/die-o-4.png", available: true },
+            { id: 25, name: "RACING PRESTIGE OVER", price: 85.00, category: "limited", image: "https://i.ibb.co/bgB2qTRg/d5.png", available: true },
+            { id: 26, name: "NOIR REBEL OVER", price: 79.00, category: "limited", image: "https://i.ibb.co/JjwVsrxb/d6.png", available: true },
+            { id: 27, name: "TITANIO SPORT OVER", price: 88.00, category: "limited", image: "https://i.ibb.co/83G1cdn/d7.png", available: true },
+            { id: 28, name: "CRIMSON ELITE OVER", price: 75.00, category: "limited", image: "https://i.ibb.co/yFS9gyL6/d8.png", available: true },
+            { id: 29, name: "RUBÍ SUPREMO OVER", price: 75.00, category: "limited", image: "https://i.ibb.co/Gv5Lc5wY/d9.png", available: true },
+            { id: 30, name: "RAYOS X NEÓN OVER", price: 67.00, category: "limited", image: "https://i.ibb.co/Qs6ZcJx/d10.png", available: true }
+        ];
+
+        const cartCount = document.getElementById('cartCount');
+        const cartItemsList = document.getElementById('cartItems');
+        const cartTotal = document.getElementById('cartTotal');
+        const cartPanel = document.getElementById('cartPanel');
+        const cartToggle = document.getElementById('cartToggle');
+        const closeCart = document.getElementById('closeCart');
+        const collectionTitle = document.getElementById('collection-title');
+        const productGrid = document.getElementById('productGrid');
+        const checkoutBtn = document.getElementById('openCheckoutBtn');
+        const modal = document.getElementById('checkoutModal');
+        const closeModal = document.getElementById('closeModal');
+        const shippingForm = document.getElementById('shippingForm');
+        const quoteResult = document.getElementById('quoteResult');
+        const adminPanel = document.getElementById('adminPanel');
+        const adminIcon = document.getElementById('adminIcon');
+        const logoutBtn = document.getElementById('logoutAdminBtn');
+
+        // ===== FUNCIONES DE AUTENTICACIÓN =====
+        function isAdminAuthenticated() {
+            return sessionStorage.getItem('adminAuth') === 'true';
+        }
+
+        function setAdminAuthenticated(value) {
+            sessionStorage.setItem('adminAuth', value);
+        }
+
+        function updateAdminPanelVisibility() {
+            if (isAdminAuthenticated()) {
+                adminPanel.style.display = 'block';
+            } else {
+                adminPanel.style.display = 'none';
+            }
+        }
+
+        adminIcon.addEventListener('click', () => {
+            if (isAdminAuthenticated()) {
+                updateAdminPanelVisibility();
+            } else {
+                const password = prompt('Ingresa la contraseña de administrador:');
+                if (password === ADMIN_PASSWORD) {
+                    setAdminAuthenticated(true);
+                    updateAdminPanelVisibility();
+                    renderProducts(); // Para mostrar los botones de toggle
+                    alert('Acceso concedido. Ya puedes administrar productos.');
+                } else {
+                    alert('Contraseña incorrecta.');
+                }
+            }
+        });
+
+        // Botón de cerrar sesión
+        logoutBtn.addEventListener('click', () => {
+            sessionStorage.removeItem('adminAuth');
+            location.reload(); // Recarga la página en modo cliente
+        });
+
+        updateAdminPanelVisibility();
+
+        // ===== FUNCIONES DEL CARRITO Y PRODUCTOS =====
+        cartToggle.addEventListener('click', () => cartPanel.classList.add('active'));
+        closeCart.addEventListener('click', () => cartPanel.classList.remove('active'));
+
+        checkoutBtn.addEventListener('click', () => {
+            if (cart.length === 0) {
+                alert('Tu carrito está vacío');
+                return;
+            }
+            modal.classList.add('active');
+            quoteResult.style.display = 'none';
+            shippingForm.style.display = 'block';
+        });
+
+        closeModal.addEventListener('click', () => {
+            modal.classList.remove('active');
+        });
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('active');
+            }
+        });
+
+        function updateCart() {
+            const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
+            cartCount.textContent = totalItems;
+
+            cartItemsList.innerHTML = '';
+            let total = 0;
+            cart.forEach((item, index) => {
+                total += item.price * item.quantity;
+                const li = document.createElement('li');
+                li.className = 'cart-item';
+                li.innerHTML = `
+                    <div class="cart-item-info">
+                        <h4>${item.name} (${item.size})</h4>
+                        <div class="cart-item-price">S/${item.price.toFixed(2)} x ${item.quantity}</div>
+                    </div>
+                    <button class="cart-item-remove" data-index="${index}">✕</button>
+                `;
+                cartItemsList.appendChild(li);
+            });
+            cartTotal.textContent = `Total: S/${total.toFixed(2)}`;
+
+            document.querySelectorAll('.cart-item-remove').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = e.target.getAttribute('data-index');
+                    cart.splice(index, 1);
+                    updateCart();
+                });
+            });
+        }
+
+        // Función para cambiar disponibilidad de un producto
+        function toggleAvailability(productId) {
+            const product = products.find(p => p.id == productId);
+            if (product) {
+                product.available = !product.available;
+                renderProducts(); // Re-renderizar para reflejar el cambio
+            }
+        }
+
+        function renderProducts() {
+            let filteredProducts = products;
+            if (currentCategory !== 'all') {
+                filteredProducts = products.filter(p => p.category === currentCategory);
+            }
+
+            productGrid.innerHTML = '';
+            filteredProducts.forEach(prod => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.dataset.id = prod.id;
+                card.dataset.name = prod.name;
+                card.dataset.price = prod.price;
+                card.dataset.category = prod.category;
+                card.dataset.img = prod.image;
+
+                // Construir HTML de la tarjeta
+                let imgHtml = `<div class="product-img" style="background-image: url('${prod.image}');">`;
+                if (!prod.available) {
+                    imgHtml += `<div class="sold-out">AGOTADO</div>`;
+                }
+                imgHtml += `</div>`;
+
+                // Botón de toggle para admin (solo si está autenticado)
+                let adminToggleHtml = '';
+                if (isAdminAuthenticated()) {
+                    adminToggleHtml = `
+                        <div class="admin-toggle" data-id="${prod.id}" title="Cambiar disponibilidad">
+                            <i class="fas fa-toggle-${prod.available ? 'on' : 'off'}"></i>
+                            <span>${prod.available ? 'Disponible' : 'Agotado'}</span>
+                        </div>
+                    `;
+                }
+
+                const infoHtml = `
+                    <div class="product-info">
+                        <div class="product-title">${prod.name}</div>
+                        <div class="product-price">S/${prod.price}</div>
+                        <div class="size-selector">
+                            <button class="size-btn" data-size="S">S</button>
+                            <button class="size-btn" data-size="M">M</button>
+                            <button class="size-btn" data-size="L">L</button>
+                        </div>
+                        <div class="quantity-selector">
+                            <button class="qty-minus">−</button>
+                            <span class="qty-value">1</span>
+                            <button class="qty-plus">+</button>
+                        </div>
+                        <button class="add-to-cart" ${!prod.available ? 'disabled' : ''}>${prod.available ? 'AÑADIR' : 'AGOTADO'}</button>
+                    </div>
+                `;
+
+                card.innerHTML = imgHtml + adminToggleHtml + infoHtml;
+                productGrid.appendChild(card);
+            });
+
+            // Asignar eventos a los botones de toggle (solo para admin)
+            if (isAdminAuthenticated()) {
+                document.querySelectorAll('.admin-toggle').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const id = e.currentTarget.dataset.id;
+                        toggleAvailability(id);
+                    });
+                });
+            }
+
+            // Inicializar eventos de talla, cantidad y añadir al carrito
+            initProductEvents();
+        }
+
+        function initProductEvents() {
+            // Eventos para selector de talla
+            document.querySelectorAll('.size-selector').forEach(selector => {
+                const btns = selector.querySelectorAll('.size-btn');
+                btns.forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        btns.forEach(b => b.classList.remove('active'));
+                        this.classList.add('active');
+                    });
+                });
+            });
+
+            // Eventos para cantidad
+            document.querySelectorAll('.quantity-selector').forEach(selector => {
+                const minus = selector.querySelector('.qty-minus');
+                const plus = selector.querySelector('.qty-plus');
+                const valueSpan = selector.querySelector('.qty-value');
+                minus.addEventListener('click', () => {
+                    let val = parseInt(valueSpan.textContent);
+                    if (val > 1) valueSpan.textContent = val - 1;
+                });
+                plus.addEventListener('click', () => {
+                    let val = parseInt(valueSpan.textContent);
+                    valueSpan.textContent = val + 1;
+                });
+            });
+
+            // Eventos para botones "AÑADIR" (solo habilitados si el producto está disponible)
+            document.querySelectorAll('.add-to-cart').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    if (button.disabled) return; // No hacer nada si está deshabilitado
+
+                    const card = e.target.closest('.product-card');
+                    const id = card.dataset.id;
+                    const name = card.dataset.name;
+                    const price = parseFloat(card.dataset.price);
+                    
+                    const sizeBtns = card.querySelectorAll('.size-btn');
+                    let selectedSize = 'M';
+                    sizeBtns.forEach(btn => {
+                        if (btn.classList.contains('active')) selectedSize = btn.dataset.size;
+                    });
+                    if (!card.querySelector('.size-btn.active')) {
+                        card.querySelector('.size-btn[data-size="M"]')?.classList.add('active');
+                        selectedSize = 'M';
+                    }
+
+                    const qtySpan = card.querySelector('.qty-value');
+                    const quantity = parseInt(qtySpan.textContent);
+
+                    const existing = cart.find(item => item.id === id && item.size === selectedSize);
+                    if (existing) {
+                        existing.quantity += quantity;
+                    } else {
+                        cart.push({ id, name, price, size: selectedSize, quantity });
+                    }
+                    updateCart();
+                    cartPanel.classList.add('active');
+                });
+            });
+
+            // Por defecto, seleccionar talla M si no hay ninguna activa
+            document.querySelectorAll('.product-card').forEach(card => {
+                if (!card.querySelector('.size-btn.active')) {
+                    const mBtn = card.querySelector('.size-btn[data-size="M"]');
+                    if (mBtn) mBtn.classList.add('active');
+                }
+            });
+        }
+
+        // Filtros
+        function filterProducts(category) {
+            currentCategory = category;
+            renderProducts();
+            if (category === 'basico') collectionTitle.textContent = 'BÁSICOS';
+            else if (category === 'personalizado') collectionTitle.textContent = 'PERSONALIZADOS';
+            else if (category === 'limited') collectionTitle.textContent = 'EDICIÓN LIMITADA';
+            else collectionTitle.textContent = 'COLECCIÓN PRINCIPAL';
+        }
+
+        document.getElementById('navAll').addEventListener('click', (e) => {
+            e.preventDefault();
+            filterProducts('all');
+        });
+        document.getElementById('navBasics').addEventListener('click', (e) => {
+            e.preventDefault();
+            filterProducts('basico');
+        });
+        document.getElementById('navCustom').addEventListener('click', (e) => {
+            e.preventDefault();
+            filterProducts('personalizado');
+        });
+        document.getElementById('navLimited').addEventListener('click', (e) => {
+            e.preventDefault();
+            filterProducts('limited');
+        });
+
+        // Agregar nuevo producto desde el panel admin
+        document.getElementById('addProductBtn').addEventListener('click', () => {
+            if (!isAdminAuthenticated()) {
+                alert('No tienes permisos para agregar productos. Inicia sesión como administrador.');
+                return;
+            }
+
+            const name = document.getElementById('newName').value.trim();
+            const price = parseFloat(document.getElementById('newPrice').value);
+            const category = document.getElementById('newCategory').value;
+            const image = document.getElementById('newImage').value.trim();
+            const available = document.getElementById('newAvailable').checked;
+
+            if (!name || isNaN(price) || price <= 0 || !image) {
+                alert('Por favor completa todos los campos correctamente (nombre, precio válido, URL de imagen)');
+                return;
+            }
+
+            // Generar nuevo ID (el máximo actual + 1)
+            const maxId = Math.max(...products.map(p => p.id), 0);
+            const newId = maxId + 1;
+
+            products.push({
+                id: newId,
+                name: name,
+                price: price,
+                category: category,
+                image: image,
+                available: available
+            });
+
+            // Limpiar campos
+            document.getElementById('newName').value = '';
+            document.getElementById('newPrice').value = '';
+            document.getElementById('newImage').value = '';
+            document.getElementById('newAvailable').checked = true;
+
+            // Re-renderizar según la categoría actual
+            renderProducts();
+
+            alert(`Producto agregado con ID ${newId}`);
+        });
+
+        // Cargar logo como base64 (para PDF)
+        async function loadLogoAsBase64(url) {
+            try {
+                const response = await fetch(url);
+                const blob = await response.blob();
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(blob);
+                });
+            } catch (error) {
+                console.error('Error cargando logo:', error);
+                return null;
+            }
+        }
+
+        // Generar PDF con moneda S/
+        async function generatePDF(formData) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+            let logoBase64 = null;
+            try {
+                logoBase64 = await loadLogoAsBase64('https://i.ibb.co/tw3fFn93/logo-3.png');
+            } catch (e) {
+                console.warn('No se pudo cargar el logo');
+            }
+
+            const quoteNumber = `COT-${Date.now().toString().slice(-8)}-${Math.floor(Math.random() * 100)}`;
+            const today = new Date();
+            const dateStr = today.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+            // Encabezado
+            if (logoBase64) {
+                doc.addImage(logoBase64, 'PNG', 14, 10, 30, 15);
+            }
+            doc.setFontSize(16);
+            doc.setTextColor(40, 40, 40);
+            doc.text('BIETTO OVERSIZE', 50, 15);
+            doc.setFontSize(9);
+            doc.setTextColor(100, 100, 100);
+            doc.text('RUC: 10345678901', 50, 22);
+            doc.text('Av. victoria gamarra, Lima, Perú', 50, 28);
+            doc.text('Bietto@oversize.com · +51 920 538 436', 50, 34);
+
+            doc.setDrawColor(200, 200, 200);
+            doc.line(14, 40, 200, 40);
+
+            doc.setFontSize(14);
+            doc.setTextColor(0, 0, 0);
+            doc.text('COTIZACIÓN DE PEDIDO', 14, 50);
+            doc.setFontSize(10);
+            doc.text(`N°: ${quoteNumber}`, 14, 58);
+            doc.text(`Fecha: ${dateStr}`, 14, 65);
+
+            // Datos del cliente
+            doc.setFontSize(11);
+            doc.setTextColor(80, 80, 80);
+            doc.text('DATOS DEL CLIENTE', 14, 78);
+            doc.setFontSize(10);
+            doc.setTextColor(0, 0, 0);
+            doc.text(`Nombre: ${formData.name}`, 14, 86);
+            doc.text(`DNI: ${formData.dni}`, 14, 93);
+            doc.text(`Dirección: ${formData.address}`, 14, 100);
+            doc.text(`Ciudad: ${formData.city}`, 14, 107);
+            doc.text(`Teléfono: ${formData.phone || 'No proporcionado'}`, 14, 114);
+            doc.text(`Notas: ${formData.notes || 'Ninguna'}`, 14, 121);
+
+            // Tabla de productos
+            const tableColumn = ["Producto", "Talla", "Cant.", "Precio", "Subtotal"];
+            const tableRows = [];
+            let total = 0;
+
+            cart.forEach(item => {
+                const subtotal = item.price * item.quantity;
+                total += subtotal;
+                tableRows.push([
+                    item.name,
+                    item.size,
+                    item.quantity,
+                    `S/${item.price.toFixed(2)}`,
+                    `S/${subtotal.toFixed(2)}`
+                ]);
+            });
+
+            doc.autoTable({
+                startY: 130,
+                head: [tableColumn],
+                body: tableRows,
+                theme: 'grid',
+                headStyles: { fillColor: [60, 60, 60], textColor: [255, 255, 255], fontStyle: 'bold' },
+                alternateRowStyles: { fillColor: [245, 245, 245] },
+                margin: { left: 14, right: 14 },
+                styles: { fontSize: 9, cellPadding: 3 }
+            });
+
+            const finalY = doc.lastAutoTable.finalY + 10;
+            doc.setFontSize(12);
+            doc.setTextColor(0, 0, 0);
+            doc.setFont(undefined, 'bold');
+            doc.text(`TOTAL: S/${total.toFixed(2)}`, 140, finalY, { align: 'right' });
+
+            doc.setFontSize(10);
+            doc.setTextColor(100, 100, 100);
+            doc.setFont(undefined, 'normal');
+            doc.text('Gracias por tu compra. Te contactaremos para coordinar el pago y envío.', 14, finalY + 15);
+            doc.text('BIETTO OVERSIZE · Prendas con estilo', 14, finalY + 25);
+            doc.line(14, finalY + 30, 200, finalY + 30);
+
+            doc.save(`cotizacion_${formData.name.replace(/\s/g, '_')}.pdf`);
+        }
+
+        // Envío del formulario
+        shippingForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById('name').value.trim();
+            const dni = document.getElementById('dni').value.trim();
+            const address = document.getElementById('address').value.trim();
+            const city = document.getElementById('city').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const notes = document.getElementById('notes').value.trim();
+
+            if (!name || !dni || !address || !city) {
+                alert('Por favor completa todos los campos obligatorios (nombre, DNI, dirección, ciudad)');
+                return;
+            }
+
+            const formData = { name, dni, address, city, phone, notes };
+
+            quoteResult.innerHTML = '<p>Generando PDF...</p>';
+            quoteResult.style.display = 'block';
+            shippingForm.style.display = 'none';
+
+            await generatePDF(formData);
+
+            const total = cart.reduce((acc, item) => acc + item.price * item.quantity, 0).toFixed(2);
+            let itemsHtml = '';
+            cart.forEach(item => {
+                itemsHtml += `<p>${item.name} - Talla ${item.size} - Cantidad: ${item.quantity} - S/${(item.price * item.quantity).toFixed(2)}</p>`;
+            });
+
+            quoteResult.innerHTML = `
+                <h3>📄 COTIZACIÓN GENERADA</h3>
+                <p><strong>Nombre:</strong> ${name}</p>
+                <p><strong>DNI:</strong> ${dni}</p>
+                <p><strong>Dirección:</strong> ${address}</p>
+                <p><strong>Ciudad:</strong> ${city}</p>
+                <p><strong>Teléfono:</strong> ${phone || 'No proporcionado'}</p>
+                <p><strong>Notas:</strong> ${notes || 'Ninguna'}</p>
+                <hr>
+                <h4>Productos:</h4>
+                ${itemsHtml}
+                <div class="total-quote"><strong>TOTAL: S/${total}</strong></div>
+                <p style="margin-top: 15px; font-style: italic;">El PDF se ha descargado automáticamente.</p>
+            `;
+        });
+
+        // Slider del hero
+        function initHeroSlider() {
+            const slides = document.querySelectorAll('.hero-slide');
+            let currentSlide = 0;
+            setInterval(() => {
+                slides[currentSlide].classList.remove('active');
+                currentSlide = (currentSlide + 1) % slides.length;
+                slides[currentSlide].classList.add('active');
+            }, 5000);
+        }
+
+        // Inicializar
+        renderProducts();
+        updateCart();
+        initHeroSlider();
+    </script>
+</body>
+</html>
